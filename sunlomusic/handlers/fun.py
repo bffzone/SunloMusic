@@ -1,19 +1,18 @@
-import asyncio
-import random
-from sunlomusic.db import db
-from sunlomusic.core.logging import logger
 # Copyright (C) @YO_UR_OFFICIAL_CRUSH
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from pyrogram.enums import ParseMode
+from pyrogram.enums import ParseMode, ChatType
 import hashlib
 import random
+import asyncio
+from sunlomusic.db import db
+from sunlomusic.core.logging import logger
+from sunlomusic.utils.permissions import permission_checker
 
 def get_percentage(name1, name2):
-    # Deterministic hash so same names give same result
     sorted_names = "".join(sorted([name1.lower().strip(), name2.lower().strip()]))
     hash_val = int(hashlib.md5(sorted_names.encode()).hexdigest(), 16)
-    return (hash_val % 101) # 0 to 100
+    return (hash_val % 101)
 
 def get_ship_message(percent, name1, name2):
     bar_length = 10
@@ -21,29 +20,17 @@ def get_ship_message(percent, name1, name2):
     bar = "❤️" * filled + "🤍" * (bar_length - filled)
     
     if percent < 20:
-        status = "💔 <b>Just Friends / Enemies</b>"
-        quote = "Koi baat nahi, dosti mein sab jaayaz hai!"
+        status = "💔 <b>Just Friends</b>"
     elif percent < 50:
         status = "🤝 <b>Good Friends</b>"
-        quote = "Achi dosti ban sakti hai inki."
     elif percent < 80:
         status = "💖 <b>Great Match!</b>"
-        quote = "Inme kaafi chemistry hai. Ek baar try karna banta hai!"
     elif percent < 100:
         status = "💘 <b>Made for Each Other</b>"
-        quote = "Yeh toh ekdum perfect jodi hai. Shaadi pakki!"
     else:
         status = "💞 <b>Perfect Soulmates (100%)</b>"
-        quote = "Dil toh ek hai, bas dhadkan alag hai. True Love!"
 
-    return (
-        f"<b>❤️ Love Calculator ❤️</b>\n\n"
-        f"👤 <b>{name1}</b>\n"
-        f"➕\n"
-        f"👤 <b>{name2}</b>\n\n"
-        f"{bar} <b>{percent}%</b>\n\n"
-        f"<blockquote>{status}\n<i>{quote}</i></blockquote>"
-    )
+    return f"<b>❤️ Love Calculator ❤️</b>\n\n👤 <b>{name1}</b>\n➕\n👤 <b>{name2}</b>\n\n{bar} <b>{percent}%</b>\n\n<blockquote>{status}</blockquote>"
 
 def register_fun_handlers(app: Client):
     @app.on_message(filters.command("love"))
@@ -52,32 +39,50 @@ def register_fun_handlers(app: Client):
         name1, name2 = None, None
 
         if message.reply_to_message and message.reply_to_message.from_user:
-            # User replied to someone
             name1 = message.from_user.first_name
             name2 = message.reply_to_message.from_user.first_name
         elif len(args) > 1:
-            # User typed /love Name1 Name2
             names = args[1].split()
             if len(names) >= 2:
                 name1 = names[0]
                 name2 = names[1]
             else:
-                await message.reply_text("**Usage:**\n`/love Name1 Name2`\nYa kisi ke message par reply karke `/ship` likhein.")
+                await message.reply_text("**Usage:**\n`/love Name1 Name2`\nYa kisi ke message par reply karke `/love` likhein.")
                 return
         else:
-            await message.reply_text("**Usage:**\n`/love Name1 Name2`\nYa kisi ke message par reply karke `/ship` likhein.")
+            await message.reply_text("**Usage:**\n`/love Name1 Name2`\nYa kisi ke message par reply karke `/love` likhein.")
             return
 
         percent = get_percentage(name1, name2)
         result_text = get_ship_message(percent, name1, name2)
-
         await message.reply_text(result_text, parse_mode=ParseMode.HTML)
 
+    @app.on_message(filters.command("couple"))
+    async def couple_toggle(client, message: Message):
+        if message.chat.type == ChatType.PRIVATE:
+            await message.reply_text("**Yeh command sirf groups mein kaam karti hai.**")
+            return
+            
+        if not await permission_checker.check_admin(client, message, require_admin=True):
+            return
+            
+        args = message.text.split(maxsplit=1)
+        if len(args) < 2:
+            await message.reply_text("**Usage:**\n`/couple on` - Auto Award ON\n`/couple off` - Auto Award OFF")
+            return
+            
+        action = args[1].lower()
+        if action == "on":
+            await db.update_chat_settings(message.chat.id, {'couple_award': True})
+            await message.reply_text("✅ **Auto Daily Couple Award ON ho gaya hai!**\nBot ab din mein 5 baar random jodi ko award dega.")
+        elif action == "off":
+            await db.update_chat_settings(message.chat.id, {'couple_award': False})
+            await message.reply_text("❌ **Auto Daily Couple Award OFF kar diya gaya hai.**")
+        else:
+            await message.reply_text("**Invalid action. Use `/couple on` ya `/couple off`.**")
 
 async def daily_couple_award_task(app: Client):
-    # Wait a bit before starting the loop to let bot fully start
     await asyncio.sleep(60)
-    
     while True:
         try:
             groups = await db.get_all_broadcast_groups()
@@ -87,19 +92,23 @@ async def daily_couple_award_task(app: Client):
                     if not chat_id: continue
                     
                     try:
+                        # Check if enabled for this group
+                        settings = await db.get_chat_settings(chat_id)
+                        if not settings.get('couple_award', False):
+                            continue
+                            
                         members = []
-                        # Fetch up to 50 members to prevent flood limits
                         async for m in app.get_chat_members(chat_id, limit=50):
                             if not m.user.is_bot and not m.user.is_deleted:
                                 members.append(m.user)
                         
                         if len(members) >= 2:
+                            # Purely random selection
                             random.shuffle(members)
                             user1 = members[0]
                             user2 = members[1]
                             
                             percent = get_percentage(user1.first_name, user2.first_name)
-                            
                             mention1 = f"[{user1.first_name}](tg://user?id={user1.id})"
                             mention2 = f"[{user2.first_name}](tg://user?id={user2.id})"
                             
@@ -112,18 +121,16 @@ async def daily_couple_award_task(app: Client):
                                 f"🏆 Aaj ke sabse pyare jodi:\n\n"
                                 f"{mention1} ❤️ {mention2}\n\n"
                                 f"{bar} <b>{percent}%</b>\n\n"
-                                f"<blockquote>✨ <i>Congratulations! Aap dono ko aaj ka Best Couple Award milta hai.</i></blockquote>"
+                                f"<blockquote>✨ <i>Congratulations! Aap dono ko aaj ka Best Couple Award milta hai.</blockquote>"
                             )
                             
                             await app.send_message(chat_id, text, parse_mode=ParseMode.HTML)
-                            await asyncio.sleep(2) # Delay to prevent flood wait
-                            
+                            await asyncio.sleep(5)
                     except Exception as e:
-                        logger.error(f"Failed to get members/send couple award in {chat_id}: {e}")
+                        logger.error(f"Couple award error in {chat_id}: {e}")
                         continue
-                        
         except Exception as e:
             logger.error(f"Error in daily_couple_award_task: {e}")
             
-        # Sleep for 4 hours (roughly 5-6 times a day)
+        # Sleep for 4 hours
         await asyncio.sleep(4 * 60 * 60)
