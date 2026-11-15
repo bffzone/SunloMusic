@@ -74,7 +74,7 @@ def register_fun_handlers(app: Client):
         action = args[1].lower()
         if action == "on":
             await db.update_chat_settings(message.chat.id, {'couple_award': True})
-            await message.reply_text("✅ **Auto Daily Couple Award ON ho gaya hai!**\nBot ab din mein 5 baar random jodi ko award dega.")
+            await message.reply_text("✅ **Auto Daily Couple Award ON kar diya gaya hai!**\nBot ab din mein 5 baar random jodi ko award dega.")
         elif action == "off":
             await db.update_chat_settings(message.chat.id, {'couple_award': False})
             await message.reply_text("❌ **Auto Daily Couple Award OFF kar diya gaya hai.**")
@@ -94,7 +94,7 @@ async def daily_couple_award_task(app: Client):
                     try:
                         # Check if enabled for this group
                         settings = await db.get_chat_settings(chat_id)
-                        if not settings.get('couple_award', False):
+                        if not settings.get('couple_award', True):
                             continue
                             
                         members = []
