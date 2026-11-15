@@ -51,18 +51,18 @@ class Messages:
     @staticmethod
     def queue_list(queue: List[Dict], page: int = 0, page_size: int = 10) -> str:
         if not queue:
-            return "📄 **Queue is empty**"
+            return "📄 <b>Queue is empty</b>"
 
         start = page * page_size
         end = start + page_size
         page_queue = queue[start:end]
 
-        message = f"📄 **Queue** ({len(queue)} tracks)\n\n"
+        message = f"📄 <b>Queue</b> ({len(queue)} tracks)\n\n"
 
         for i, track in enumerate(page_queue, start=start+1):
             title = track.get('title', 'Unknown')
             duration = Messages._format_duration(track.get('duration', 0))
-            message += f"{i}. **{title}** `[{duration}]`\n"
+            message += f"{i}. <b>{title}</b> `[{duration}]`\n"
 
         total_pages = (len(queue) + page_size - 1) // page_size
         message += f"\nPage {page+1}/{total_pages}"
@@ -71,7 +71,7 @@ class Messages:
 
     @staticmethod
     def settings_info(settings: Dict) -> str:
-        message = "![⚙️](tg://emoji?id=5316832430529722441) **Configure Your VCPlayer Settings Here.**\n"
+        message = "<emoji id='5316832430529722441'>⚙️</emoji> <b>Configure Your VCPlayer Settings Here.</b>\n"
         message += "━━━━━━━━━━━━━━━━━━━━━━━"
 
         return message
@@ -89,8 +89,8 @@ class Messages:
     @staticmethod
     def autoplay_prompt(seed_title: str) -> str:
         return (
-            f"![🎧](tg://emoji?id=5334665104677941170) **Playlist finished**\n\n"
-            f"**Last played:** {seed_title}\n\n"
+            f"<emoji id='5334665104677941170'>🎧</emoji> <b>Playlist finished</b>\n\n"
+            f"<b>Last played:</b> {seed_title}\n\n"
             f"Want me to keep the music going with related songs?"
         )
 
@@ -113,15 +113,15 @@ class Messages:
     @staticmethod
     def autoplay_searching() -> str:
         return (
-            "![🔎](tg://emoji?id=5258396243666681152) **Looking for related songs…**\n\n"
+            "<emoji id='5258396243666681152'>🔎</emoji> <b>Looking for related songs…</b>\n\n"
             "This may take a few seconds."
         )
 
     @staticmethod
     def autoplay_queued(count: int, seed_title: str) -> str:
         return (
-            f"![🎧](tg://emoji?id=5334665104677941170) **Autoplay on**\n\n"
-            f"Queued **{count} related track(s)** based on **{seed_title}**."
+            f"<emoji id='5334665104677941170'>🎧</emoji> <b>Autoplay on</b>\n\n"
+            f"Queued <b>{count} related track(s)</b> based on <b>{seed_title}</b>."
         )
 
     @staticmethod
@@ -151,17 +151,17 @@ class Messages:
     @staticmethod
     def autoplay_unavailable() -> str:
         return (
-            "❌ **No related songs found**\n\n"
+            "❌ <b>No related songs found</b>\n\n"
             "Autoplay could not find anything to play next."
         )
 
     @staticmethod
     def autoplay_declined() -> str:
-        return "⏹️ **Autoplay skipped** — playback stopped."
+        return "⏹️ <b>Autoplay skipped</b> — playback stopped."
 
     @staticmethod
     def autoplay_expired() -> str:
-        return "⌛️ **Autoplay request expired** — nobody answered, playback stopped."
+        return "⌛️ <b>Autoplay request expired</b> — nobody answered, playback stopped."
 
     @staticmethod
     def vc_welcome(name: str = None) -> str:
@@ -171,7 +171,7 @@ class Messages:
     @staticmethod
     def track_added(track: Dict, position: int) -> str:
         title = track.get('title', 'Unknown')
-        return f"✅ Added to queue at position {position}\n**{title}**"
+        return f"✅ Added to queue at position {position}\n<b>{title}</b>"
 
     @staticmethod
     def queue_updated(queue: List[Dict]) -> str:
@@ -211,15 +211,15 @@ class Messages:
 
     @staticmethod
     def playlist_saved(name: str, count: int) -> str:
-        return f"💾 Playlist **{name}** saved with {count} tracks"
+        return f"💾 Playlist <b>{name}</b> saved with {count} tracks"
 
     @staticmethod
     def playlist_loaded(name: str, count: int) -> str:
-        return f"📀 Loaded playlist **{name}** with {count} tracks"
+        return f"📀 Loaded playlist <b>{name}</b> with {count} tracks"
 
     @staticmethod
     def error(message: str) -> str:
-        return f"❌ **Error:** {message}"
+        return f"❌ <b>Error:</b> {message}"
 
     @staticmethod
     def success(message: str) -> str:
@@ -409,25 +409,25 @@ class Messages:
         def rows(items):
             return "\n".join(f"`{cmd}` - {desc}" for cmd, desc in items)
 
-        note = "📌 **Note:** Most commands work only in groups where the bot is admin."
+        note = "📌 <b>Note:</b> Most commands work only in groups where the bot is admin."
         if section == "basic":
-            return f"📖 **Basic Commands**\n\n{rows(Messages.HELP_BASIC)}"
+            return f"📖 <b>Basic Commands</b>\n\n{rows(Messages.HELP_BASIC)}"
         if section == "music":
             return (
-                f"🎶 **Music Commands** (Use in groups)\n\n{rows(Messages.HELP_MUSIC)}\n"
-                "🎚 **Effects** - Tap the Effects button on the player for bassboost/nightcore/slowed/lofi/8d + speed control"
+                f"🎶 <b>Music Commands</b> (Use in groups)\n\n{rows(Messages.HELP_MUSIC)}\n"
+                "🎚 <b>Effects</b> - Tap the Effects button on the player for bassboost/nightcore/slowed/lofi/8d + speed control"
             )
         if section == "settings":
             return (
-                f"⚙️ **Settings** (Admin only)\n\n{rows(Messages.HELP_SETTINGS)}\n\n"
-                f"**Owner Commands:**\n{rows(Messages.HELP_OWNER)}\n\n{note}"
+                f"⚙️ <b>Settings</b> (Admin only)\n\n{rows(Messages.HELP_SETTINGS)}\n\n"
+                f"<b>Owner Commands:</b>\n{rows(Messages.HELP_OWNER)}\n\n{note}"
             )
         return (
-            "![🎵](tg://emoji?id=5334665104677941170) **SunloMusic Bot Commands**\n\n"
+            "<emoji id='5334665104677941170'>🎵</emoji> <b>SunloMusic Bot Commands</b>\n\n"
             "Pick a category below to see its commands.\n\n"
-            "• **Basic** - start, help, status and rankings\n"
-            "• **Music** - playback, queue, seek and effects\n"
-            "• **Settings** - admin tools and owner commands\n\n"
+            "• <b>Basic</b> - start, help, status and rankings\n"
+            "• <b>Music</b> - playback, queue, seek and effects\n"
+            "• <b>Settings</b> - admin tools and owner commands\n\n"
             f"{note}"
         )
 
@@ -439,24 +439,24 @@ class Messages:
     def status_message(total_users: int, total_groups: int, total_songs: int, active_vcs: int,
                        ping: float = None, cpu_usage: float = None) -> str:
         text = (
-            f"📊 **Bot Usage Report**\n"
+            f"📊 <b>Bot Usage Report</b>\n"
             f"━━━━━━━━━━━\n"
-            f"**Total Users:** {total_users}\n"
-            f"**Total Groups:** {total_groups}\n"
-            f"**Total Songs Played:** {total_songs}\n"
-            f"**Active Voice Chats:** {active_vcs}"
+            f"<b>Total Users:</b> {total_users}\n"
+            f"<b>Total Groups:</b> {total_groups}\n"
+            f"<b>Total Songs Played:</b> {total_songs}\n"
+            f"<b>Active Voice Chats:</b> {active_vcs}"
         )
         if ping is not None or cpu_usage is not None:
-            text += "\n\n🛰 **Voice Engine**\n"
+            text += "\n\n🛰 <b>Voice Engine</b>\n"
             if ping is not None:
-                text += f"**Ping:** {ping:.1f} ms\n"
+                text += f"<b>Ping:</b> {ping:.1f} ms\n"
             if cpu_usage is not None:
-                text += f"**CPU Usage:** {cpu_usage:.1f}%"
+                text += f"<b>CPU Usage:</b> {cpu_usage:.1f}%"
         return text
 
     @staticmethod
     def ranking_message(stats: Dict, period: str = "Daily") -> str:
-        message = f"![🏆](tg://emoji?id=5944970130554359187) **Group Rankings - {period}**\n"
+        message = f"<emoji id='5944970130554359187'>🏆</emoji> <b>Group Rankings - {period}</b>\n"
         message += "━━━━━━━━━━━━━━━━\n\n"
 
         if not stats or not stats.get('total_stats'):
@@ -467,17 +467,17 @@ class Messages:
         total_stats = stats.get('total_stats', {})
 
         if top_users:
-            message += "👥 **Top 5 Users:**\n"
+            message += "👥 <b>Top 5 Users:</b>\n"
             for i, user in enumerate(top_users, 1):
                 user_name = user['_id']['user_name']
                 count = user['count']
                 message += f"{i}. {user_name} - {count} songs\n"
             message += "\n"
         else:
-            message += "👥 **Top 5 Users:**\nNo data available\n\n"
+            message += "👥 <b>Top 5 Users:</b>\nNo data available\n\n"
 
         if top_songs:
-            message += "![🎵](tg://emoji?id=5334665104677941170) **Top 5 Songs:**\n"
+            message += "<emoji id='5334665104677941170'>🎵</emoji> <b>Top 5 Songs:</b>\n"
             for i, song in enumerate(top_songs, 1):
                 song_title = song['_id']
                 if len(song_title) > 40:
@@ -486,9 +486,9 @@ class Messages:
                 message += f"{i}. {song_title} - {count} plays\n"
             message += "\n"
         else:
-            message += "![🎵](tg://emoji?id=5334665104677941170) **Top 5 Songs:**\nNo data available\n\n"
+            message += "<emoji id='5334665104677941170'>🎵</emoji> <b>Top 5 Songs:</b>\nNo data available\n\n"
 
-        message += "📊 **Stats:**\n"
+        message += "📊 <b>Stats:</b>\n"
         total_songs = total_stats.get('total_songs', 0)
         unique_users = len(total_stats.get('unique_users', []))
         total_duration = total_stats.get('total_duration', 0)
@@ -504,7 +504,7 @@ class Messages:
 
     @staticmethod
     def global_ranking_message(stats: Dict) -> str:
-        message = "🌍 **Global Rankings**\n"
+        message = "🌍 <b>Global Rankings</b>\n"
         message += "━━━━━━━━━━━━━━━━\n\n"
 
         if not stats or not stats.get('total_stats'):
@@ -516,7 +516,7 @@ class Messages:
         total_stats = stats.get('total_stats', {})
 
         if top_groups:
-            message += "![🏆](tg://emoji?id=5944970130554359187) **Top 5 Groups:**\n"
+            message += "<emoji id='5944970130554359187'>🏆</emoji> <b>Top 5 Groups:</b>\n"
             for i, group in enumerate(top_groups, 1):
                 chat_title = group.get('chat_title', 'Unknown Group')
                 if len(chat_title) > 30:
@@ -525,20 +525,20 @@ class Messages:
                 message += f"{i}. {chat_title} - {count} songs\n"
             message += "\n"
         else:
-            message += "![🏆](tg://emoji?id=5944970130554359187) **Top 5 Groups:**\nNo data available\n\n"
+            message += "<emoji id='5944970130554359187'>🏆</emoji> <b>Top 5 Groups:</b>\nNo data available\n\n"
 
         if top_users:
-            message += "👥 **Top 5 Users:**\n"
+            message += "👥 <b>Top 5 Users:</b>\n"
             for i, user in enumerate(top_users, 1):
                 user_name = user['_id']['user_name']
                 count = user['count']
                 message += f"{i}. {user_name} - {count} songs\n"
             message += "\n"
         else:
-            message += "👥 **Top 5 Users:**\nNo data available\n\n"
+            message += "👥 <b>Top 5 Users:</b>\nNo data available\n\n"
 
         if top_songs:
-            message += "![🎵](tg://emoji?id=5334665104677941170) **Top 5 Songs:**\n"
+            message += "<emoji id='5334665104677941170'>🎵</emoji> <b>Top 5 Songs:</b>\n"
             for i, song in enumerate(top_songs, 1):
                 song_title = song['_id']
                 if len(song_title) > 40:
@@ -547,9 +547,9 @@ class Messages:
                 message += f"{i}. {song_title} - {count} plays\n"
             message += "\n"
         else:
-            message += "![🎵](tg://emoji?id=5334665104677941170) **Top 5 Songs:**\nNo data available\n\n"
+            message += "<emoji id='5334665104677941170'>🎵</emoji> <b>Top 5 Songs:</b>\nNo data available\n\n"
 
-        message += "📊 **Global Stats:**\n"
+        message += "📊 <b>Global Stats:</b>\n"
         total_songs = total_stats.get('total_songs', 0)
         unique_groups = len(total_stats.get('unique_groups', []))
         total_duration = total_stats.get('total_duration', 0)
