@@ -6,7 +6,7 @@ class Messages:
     @staticmethod
     def now_playing(track: Dict, requested_by: str = "Unknown", current_time: int = 0, queue: List[Dict] = None, playlist_unfetched: int = 0) -> str:
         title = track.get('title', 'Unknown')
-        message = f"<emoji id="5334665104677941170">🎵</emoji> <b>Music Playlist:</b>\n\n"
+        message = f"<emoji id='5334665104677941170'>🎵</emoji> <b>Music Playlist:</b>\n\n"
 
         req_id = track.get('requested_by_id')
         if req_id:
@@ -14,8 +14,8 @@ class Messages:
         else:
             req_mention = requested_by
 
-        message += f"<b>1. <emoji id="5222472119295684375">🎸</emoji> {title}</b>\n"
-        message += f"<emoji id="5944970130554359187">🏆</emoji> <b>Requested by:</b> {req_mention}\n\n"
+        message += f"<b>1. <emoji id='5222472119295684375'>🎸</emoji> {title}</b>\n"
+        message += f"<emoji id='5944970130554359187'>🏆</emoji> <b>Requested by:</b> {req_mention}\n\n"
 
         if queue and len(queue) > 1:
             for i, next_track in enumerate(queue[1:4], start=2):
@@ -28,8 +28,8 @@ class Messages:
                     next_mention = f"[{next_name}](tg://user?id={next_id})"
                 else:
                     next_mention = next_name
-                message += f"<b>{i}. <emoji id="5222472119295684375">🎸</emoji> {next_title}</b>\n"
-                message += f"<emoji id="5944970130554359187">🏆</emoji> <b>Requested by:</b> {next_mention}\n\n"
+                message += f"<b>{i}. <emoji id='5222472119295684375'>🎸</emoji> {next_title}</b>\n"
+                message += f"<emoji id='5944970130554359187'>🏆</emoji> <b>Requested by:</b> {next_mention}\n\n"
 
             shown = min(len(queue), 4)
             remaining_in_queue = len(queue) - shown
@@ -187,7 +187,7 @@ class Messages:
         else:
             timer = "🔴 Live Stream"
 
-        message = f"<emoji id="5334665104677941170">🎵</emoji> <b>Music Playlist:</b>\n\n"
+        message = f"<emoji id='5334665104677941170'>🎵</emoji> <b>Music Playlist:</b>\n\n"
         message += f"{timer}\n\n"
 
         for i, track in enumerate(queue[:5], start=1):
@@ -200,8 +200,8 @@ class Messages:
                 req_mention = f"[{req_name}](tg://user?id={req_id})"
             else:
                 req_mention = req_name
-            message += f"<b>{i}. <emoji id="5222472119295684375">🎸</emoji> {track_title}</b>\n"
-            message += f"<emoji id="5944970130554359187">🏆</emoji> <b>Requested by:</b> {req_mention}\n\n"
+            message += f"<b>{i}. <emoji id='5222472119295684375'>🎸</emoji> {track_title}</b>\n"
+            message += f"<emoji id='5944970130554359187'>🏆</emoji> <b>Requested by:</b> {req_mention}\n\n"
 
         if len(queue) > 5:
             remaining = len(queue) - 5
