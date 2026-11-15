@@ -75,7 +75,7 @@ class VCMusicBot:
             api_id=Config.API_ID,
             api_hash=Config.API_HASH,
             bot_token=Config.BOT_TOKEN,
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=ParseMode.HTML
         )
 
         self.user_client = Client(
@@ -83,7 +83,7 @@ class VCMusicBot:
             api_id=Config.API_ID,
             api_hash=Config.API_HASH,
             session_string=Config.SESSION_STRING,
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=ParseMode.HTML
         )
 
         self.tgcalls_manager = TGCallsManager(self.user_client)

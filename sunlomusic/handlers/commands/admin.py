@@ -15,7 +15,7 @@ from sunlomusic.utils.rich import reply_welcome, reply_help
 
 
 async def start_command(client: Client, message: Message):
-    from pyrogram.enums import ChatType
+    from pyrogram.enums import ChatType, ParseMode
 
     if message.chat.type == ChatType.PRIVATE and message.from_user:
         user_name = message.from_user.first_name or "Unknown"
@@ -26,16 +26,20 @@ async def start_command(client: Client, message: Message):
     me = await client.get_me()
     markup = keyboards.start_menu(me.username)
     
+    user_first_name = message.from_user.first_name if message.from_user else "User"
+    start_text = messages.start_welcome(user_first_name)
+    
     img_url = os.getenv("START_IMG_URL")
-    if img_url:
-        try:
-            await message.reply_photo(photo=img_url, caption=messages.start_welcome(), reply_markup=markup)
-            return
-        except Exception as e:
-            logger.error(f"Failed to send start image: {e}")
-            
-    if not await reply_welcome(message, markup):
-        await message.reply_text(messages.start_welcome(), reply_markup=markup)
+    
+    try:
+        if img_url:
+            await message.reply_photo(photo=img_url, caption=start_text, reply_markup=markup, parse_mode=ParseMode.HTML)
+        else:
+            await message.reply_text(start_text, reply_markup=markup, parse_mode=ParseMode.HTML)
+    except Exception as e:
+        logger.error(f"Error sending start message with image: {e}")
+        # Fallback if image fails (e.g., Imgur block)
+        await message.reply_text(start_text, reply_markup=markup, parse_mode=ParseMode.HTML)
 
 
 async def help_command(client: Client, message: Message):
