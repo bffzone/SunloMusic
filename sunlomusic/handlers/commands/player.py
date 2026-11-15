@@ -21,7 +21,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
 
     if message.chat.type == ChatType.PRIVATE:
         me = await client.get_me()
-        await message.reply_text(text=
+        await message.reply_text(parse_mode=ParseMode.HTML, text=
             messages.dm_not_allowed(),
             reply_markup=keyboards.start_menu(me.username)
        )
@@ -34,14 +34,14 @@ async def play_command(client: Client, message: Message, player, tgcalls):
 
     if message.reply_to_message:
         from sunlomusic.services.processor import processor
-        status_msg = await message.reply_text(text="📥 <b>Processing Telegram file...</b>")
+        status_msg = await message.reply_text(parse_mode=ParseMode.HTML, text="📥 <b>Processing Telegram file...</b>")
         file_info = await processor.download_telegram_file(client, message.reply_to_message)
 
         if file_info and 'error' in file_info:
             if file_info['error'] == 'unsupported':
-                await status_msg.edit_text(text="❌ <b>Only audio and video files are supported.</b>")
+                await status_msg.edit_text(parse_mode=ParseMode.HTML, text="❌ <b>Only audio and video files are supported.</b>")
             else:
-                await status_msg.edit_text(text=messages.error("Unable to process that file. Please try another file."))
+                await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error("Unable to process that file. Please try another file."))
             return
 
         if file_info:
@@ -50,7 +50,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                 hours = Config.MAX_TRACK_DURATION // 3600
                 dur_h = int(file_duration // 3600)
                 dur_m = int((file_duration % 3600) // 60)
-                await status_msg.edit_text(text=
+                await status_msg.edit_text(parse_mode=ParseMode.HTML, text=
                     f"⏱️ <b>Track Too Long</b>\n\n"
                     f"<emoji id='5222472119295684375'>🎸</emoji> {file_info.get('title', 'This file')}\n"
                     f"⌛️ <b>Duration:</b> {dur_h}h {dur_m}m\n"
@@ -73,7 +73,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                 current = await queue_manager.get_current_track(message.chat.id)
                 if current:
                     try:
-                        await status_msg.edit_text(text="<emoji id='5429440296867886716'>🚀</emoji> <b>Almost there… Starting playback!</b>",)
+                        await status_msg.edit_text(parse_mode=ParseMode.HTML, text="<emoji id='5429440296867886716'>🚀</emoji> <b>Almost there… Starting playback!</b>",)
                     except Exception:
                         pass
                     player.set_now_playing_message(message.chat.id, status_msg.id)
@@ -82,9 +82,9 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                     except Exception as play_err:
                         logger.error(f"Error starting playback in {message.chat.id}: {play_err}")
                         try:
-                            await status_msg.edit_text(text=messages.error(str(play_err)))
+                            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error(str(play_err)))
                         except Exception:
-                            await message.reply_text(text=messages.error(str(play_err)))
+                            await message.reply_text(parse_mode=ParseMode.HTML, text=messages.error(str(play_err)))
             else:
                 queue = await queue_manager.get_queue(message.chat.id)
                 current = await player.get_current_track(message.chat.id)
@@ -114,9 +114,9 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                        )
                     except Exception as e:
                         logger.error(f"Thumbnail send failed: {e}")
-                        msg = await message.reply_text(text=_caption, reply_markup=_kb)
+                        msg = await message.reply_text(parse_mode=ParseMode.HTML, text=_caption, reply_markup=_kb)
                 else:
-                    msg = await message.reply_text(text=_caption, reply_markup=_kb)
+                    msg = await message.reply_text(parse_mode=ParseMode.HTML, text=_caption, reply_markup=_kb)
                 if old_np_id and old_np_id != msg.id:
                     try:
                         await client.delete_messages(message.chat.id, old_np_id)
@@ -127,20 +127,20 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                 if ui_progress_updater.progress_updater:
                     ui_progress_updater.progress_updater.start_updates(message.chat.id, msg.id)
         else:
-            await status_msg.edit_text(text=messages.error("Unable to process that file. Please try another file."))
+            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error("Unable to process that file. Please try another file."))
         return
 
     if not query:
-        await message.reply_text(text="❌ <b>I need a song name or YouTube link to play.</b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="❌ <b>I need a song name or YouTube link to play.</b>")
         return
 
     source_type, source_value = validators.detect_source(query)
 
     try:
-        status_msg = await message.reply_text(text="<emoji id='5258396243666681152'>🔎</emoji> <b>Searching your song… hold on!</b>")
+        status_msg = await message.reply_text(parse_mode=ParseMode.HTML, text="<emoji id='5258396243666681152'>🔎</emoji> <b>Searching your song… hold on!</b>")
 
         if source_type == 'url' and not validators.is_youtube_url(source_value):
-            await status_msg.edit_text(text="❌ <b>Only YouTube links are supported for playback.</b>")
+            await status_msg.edit_text(parse_mode=ParseMode.HTML, text="❌ <b>Only YouTube links are supported for playback.</b>")
             return
 
         if source_type == 'youtube' and downloader.is_playlist_url(source_value):
@@ -151,11 +151,11 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                     pass
                 return
 
-            await status_msg.edit_text(text="📋 <b>Loading playlist… fetching first tracks!</b>")
+            await status_msg.edit_text(parse_mode=ParseMode.HTML, text="📋 <b>Loading playlist… fetching first tracks!</b>")
 
             playlist_info = await downloader.get_playlist_info(source_value)
             if not playlist_info or not playlist_info.get('entries'):
-                await status_msg.edit_text(text=messages.error("Could not load playlist. Make sure it is public."))
+                await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error("Could not load playlist. Make sure it is public."))
                 return
 
             total = min(playlist_info['total'], Config.MAX_PLAYLIST_TRACKS)
@@ -163,7 +163,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             first_batch = await downloader.get_playlist_batch(source_value, 0, batch_size)
 
             if not first_batch:
-                await status_msg.edit_text(text=messages.error("Could not load any tracks from playlist."))
+                await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error("Could not load any tracks from playlist."))
                 return
 
             requester = message.from_user.first_name if message.from_user else "Unknown"
@@ -208,7 +208,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             metadata = await downloader.get_metadata(source_value)
 
         if not metadata:
-            await status_msg.edit_text(text=messages.error("No results found. Try a different link or search term."))
+            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error("No results found. Try a different link or search term."))
             return
 
         track_duration = metadata.get('duration', 0) or 0
@@ -216,7 +216,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             hours = Config.MAX_TRACK_DURATION // 3600
             dur_h = int(track_duration // 3600)
             dur_m = int((track_duration % 3600) // 60)
-            await status_msg.edit_text(text=
+            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=
                 f"⏱️ <b>Track Too Long</b>\n\n"
                 f"<emoji id='5222472119295684375'>🎸</emoji> {metadata.get('title', 'This track')}\n"
                 f"⌛️ <b>Duration:</b> {dur_h}h {dur_m}m\n"
@@ -243,7 +243,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             current_video_id = downloader.track_video_id(current) if current else None
             if current_video_id and current_video_id == downloader.track_video_id(track):
                 logger.info(f"Refused duplicate play of '{track['title']}' in {message.chat.id} (already playing)")
-                await status_msg.edit_text(text=
+                await status_msg.edit_text(parse_mode=ParseMode.HTML, text=
                     f"🔁 <b>Already Playing</b>\n\n"
                     f"<emoji id='5222472119295684375'>🎸</emoji> {track['title']}\n\n"
                     f"⚠️ <b>This music is already playing in the voice chat.</b>"
@@ -268,7 +268,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                     break
                 
         if is_duplicate:
-            await status_msg.edit_text(text=
+            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=
                 f"🔁 <b>Already in Queue</b>\n\n"
                 f"<emoji id='5222472119295684375'>🎸</emoji> {track['title']}\n\n"
                 f"⚠️ <b>This music is already in the playlist/queue.</b>"
@@ -281,7 +281,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             current = await queue_manager.get_current_track(message.chat.id)
             if current:
                 try:
-                    await status_msg.edit_text(text="<emoji id='5429440296867886716'>🚀</emoji> <b>Almost there… Starting playback!</b>",)
+                    await status_msg.edit_text(parse_mode=ParseMode.HTML, text="<emoji id='5429440296867886716'>🚀</emoji> <b>Almost there… Starting playback!</b>",)
                 except Exception:
                     pass
                 player.set_now_playing_message(message.chat.id, status_msg.id)
@@ -290,9 +290,9 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                 except Exception as play_err:
                     logger.error(f"Error starting playback in {message.chat.id}: {play_err}")
                     try:
-                        await status_msg.edit_text(text=messages.error(str(play_err)))
+                        await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error(str(play_err)))
                     except Exception:
-                        await message.reply_text(text=messages.error(str(play_err)))
+                        await message.reply_text(parse_mode=ParseMode.HTML, text=messages.error(str(play_err)))
         else:
             queue = await queue_manager.get_queue(message.chat.id)
             current = await player.get_current_track(message.chat.id)
@@ -309,7 +309,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             except Exception:
                 pass
             old_np_id = player.get_now_playing_message(message.chat.id)
-            msg = await message.reply_text(text=
+            msg = await message.reply_text(parse_mode=ParseMode.HTML, text=
                 messages.now_playing(current, current.get('requested_by', 'Unknown'), current_time, queue, playlist_unfetched),
                 reply_markup=keyboards.player_controls(message.chat.id, is_paused, current_time, total_time, is_live, loop_mode, len(queue), settings.get('autoplay', False))
            )
@@ -326,9 +326,9 @@ async def play_command(client: Client, message: Message, player, tgcalls):
     except Exception as e:
         logger.error(f"Error in play command: {e}")
         try:
-            await status_msg.edit_text(text=messages.error(str(e)))
+            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error(str(e)))
         except Exception:
-            await message.reply_text(text=messages.error(str(e)))
+            await message.reply_text(parse_mode=ParseMode.HTML, text=messages.error(str(e)))
 
 
 async def pause_command(client: Client, message: Message, player):
@@ -336,7 +336,7 @@ async def pause_command(client: Client, message: Message, player):
 
     if message.chat.type == ChatType.PRIVATE:
         me = await client.get_me()
-        await message.reply_text(text=
+        await message.reply_text(parse_mode=ParseMode.HTML, text=
             messages.dm_not_allowed(),
             reply_markup=keyboards.start_menu(me.username)
        )
@@ -347,11 +347,11 @@ async def pause_command(client: Client, message: Message, player):
 
     result = await player.pause(message.chat.id)
     if result is True:
-        await message.reply_text(text="<emoji id='6111404923637733475'>⏸️</emoji> <b>Playback paused.</b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="<emoji id='6111404923637733475'>⏸️</emoji> <b>Playback paused.</b>")
     elif result is None:
-        await message.reply_text(text="⏸️ <b>Playback is already paused.</b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="⏸️ <b>Playback is already paused.</b>")
     else:
-        await message.reply_text(text="❌ <b>There is no active track at the moment.</b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="❌ <b>There is no active track at the moment.</b>")
 
 
 async def resume_command(client: Client, message: Message, player):
@@ -359,7 +359,7 @@ async def resume_command(client: Client, message: Message, player):
 
     if message.chat.type == ChatType.PRIVATE:
         me = await client.get_me()
-        await message.reply_text(text=
+        await message.reply_text(parse_mode=ParseMode.HTML, text=
             messages.dm_not_allowed(),
             reply_markup=keyboards.start_menu(me.username)
        )
@@ -370,11 +370,11 @@ async def resume_command(client: Client, message: Message, player):
 
     result = await player.resume(message.chat.id)
     if result is True:
-        await message.reply_text(text="<emoji id='5850346984501680054'>▶️</emoji> <b>Playback resumed.</b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="<emoji id='5850346984501680054'>▶️</emoji> <b>Playback resumed.</b>")
     elif result is None:
-        await message.reply_text(text="▶️ <b>Music is already playing.</b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="▶️ <b>Music is already playing.</b>")
     else:
-        await message.reply_text(text="❌ <b>There is no active track at the moment.</b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="❌ <b>There is no active track at the moment.</b>")
 
 
 async def skip_command(client: Client, message: Message, player):
@@ -382,7 +382,7 @@ async def skip_command(client: Client, message: Message, player):
 
     if message.chat.type == ChatType.PRIVATE:
         me = await client.get_me()
-        await message.reply_text(text=
+        await message.reply_text(parse_mode=ParseMode.HTML, text=
             messages.dm_not_allowed(),
             reply_markup=keyboards.start_menu(me.username)
        )
@@ -392,21 +392,21 @@ async def skip_command(client: Client, message: Message, player):
         return
 
     if not await player.is_playing(message.chat.id):
-        await message.reply_text(text="❌ <b>No music in queue</b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="❌ <b>No music in queue</b>")
         return
 
     user_name = message.from_user.first_name if message.from_user else "Unknown"
     user_id = message.from_user.id if message.from_user else "Unknown"
     logger.info(f"SKIP COMMAND - User: {user_name} (ID: {user_id}) skipped in chat {message.chat.id}")
-    status_msg = await message.reply_text(text="<emoji id='6111707078881975618'>⏭️</emoji> <b>Skipping to next track...</b>")
+    status_msg = await message.reply_text(parse_mode=ParseMode.HTML, text="<emoji id='6111707078881975618'>⏭️</emoji> <b>Skipping to next track...</b>")
     await player.skip(message.chat.id)
     try:
-        await status_msg.edit_text(text=
+        await status_msg.edit_text(parse_mode=ParseMode.HTML, text=
             "<emoji id='6111707078881975618'>⏭️</emoji> <b>Skipped to the next track.</b>",
             
        )
     except Exception:
-        await status_msg.edit_text(text="⏭️ <b>Skipped to the next track.</b>")
+        await status_msg.edit_text(parse_mode=ParseMode.HTML, text="⏭️ <b>Skipped to the next track.</b>")
 
 
 async def stop_command(client: Client, message: Message, player):
@@ -414,7 +414,7 @@ async def stop_command(client: Client, message: Message, player):
 
     if message.chat.type == ChatType.PRIVATE:
         me = await client.get_me()
-        await message.reply_text(text=
+        await message.reply_text(parse_mode=ParseMode.HTML, text=
             messages.dm_not_allowed(),
             reply_markup=keyboards.start_menu(me.username)
        )
@@ -423,12 +423,12 @@ async def stop_command(client: Client, message: Message, player):
     if not await permission_checker.check_admin(client, message, require_admin=True):
         return
 
-    status_msg = await message.reply_text(text="🛑 <b>Stopping playback...</b>")
+    status_msg = await message.reply_text(parse_mode=ParseMode.HTML, text="🛑 <b>Stopping playback...</b>")
     if await player.stop(message.chat.id):
         await queue_manager.clear_queue(message.chat.id)
-        await status_msg.edit_text(text="<emoji id='5280803324273115630'>🚫</emoji> <b>Player stopped and voice chat left.</b>")
+        await status_msg.edit_text(parse_mode=ParseMode.HTML, text="<emoji id='5280803324273115630'>🚫</emoji> <b>Player stopped and voice chat left.</b>")
     else:
-        await status_msg.edit_text(text="🛑 <b>The player is not running right now.</b>")
+        await status_msg.edit_text(parse_mode=ParseMode.HTML, text="🛑 <b>The player is not running right now.</b>")
 
 
 async def seek_command(client: Client, message: Message, player):
@@ -437,28 +437,28 @@ async def seek_command(client: Client, message: Message, player):
 
     args = message.text.split()
     if len(args) < 2:
-        await message.reply_text(text="❌ <b>Usage: /seek <seconds></b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="❌ <b>Usage: /seek <seconds></b>")
         return
 
     try:
         seconds = int(args[1])
         if seconds > 0:
-            status_msg = await message.reply_text(text=f"⏩ <b>Seeking forward...</b>")
+            status_msg = await message.reply_text(parse_mode=ParseMode.HTML, text=f"⏩ <b>Seeking forward...</b>")
         elif seconds < 0:
-            status_msg = await message.reply_text(text=f"⏪ <b>Rewinding...</b>")
+            status_msg = await message.reply_text(parse_mode=ParseMode.HTML, text=f"⏪ <b>Rewinding...</b>")
         else:
-            status_msg = await message.reply_text(text=f"🔁 <b>Restarting...</b>")
+            status_msg = await message.reply_text(parse_mode=ParseMode.HTML, text=f"🔁 <b>Restarting...</b>")
 
         await player.seek(message.chat.id, seconds)
 
         if seconds > 0:
-            await status_msg.edit_text(text=f"⏩ <b>Seeked forward {seconds}s</b>")
+            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=f"⏩ <b>Seeked forward {seconds}s</b>")
         elif seconds < 0:
-            await status_msg.edit_text(text=f"⏪ <b>Rewinded {abs(seconds)}s</b>")
+            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=f"⏪ <b>Rewinded {abs(seconds)}s</b>")
         else:
-            await status_msg.edit_text(text=f"🔁 <b>Restarted from the beginning.</b>")
+            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=f"🔁 <b>Restarted from the beginning.</b>")
     except ValueError:
-        await message.reply_text(text="❌ <b>Invalid seconds value</b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="❌ <b>Invalid seconds value</b>")
 
 
 async def rewind_command(client: Client, message: Message, player):
@@ -472,12 +472,12 @@ async def rewind_command(client: Client, message: Message, player):
         try:
             seconds = int(args[1])
         except ValueError:
-            await message.reply_text(text="❌ <b>Invalid seconds value</b>")
+            await message.reply_text(parse_mode=ParseMode.HTML, text="❌ <b>Invalid seconds value</b>")
             return
 
-    status_msg = await message.reply_text(text=f"⏪ <b>Rewinding {seconds}s...</b>")
+    status_msg = await message.reply_text(parse_mode=ParseMode.HTML, text=f"⏪ <b>Rewinding {seconds}s...</b>")
     await player.seek(message.chat.id, -seconds)
-    await status_msg.edit_text(text=f"⏪ <b>Rewinded {seconds}s</b>")
+    await status_msg.edit_text(parse_mode=ParseMode.HTML, text=f"⏪ <b>Rewinded {seconds}s</b>")
 
 
 async def mute_command(client: Client, message: Message, player):
@@ -486,10 +486,10 @@ async def mute_command(client: Client, message: Message, player):
 
     try:
         await player.mute(message.chat.id)
-        await message.reply_text(text="<emoji id='5408916593780470262'>🔇</emoji> <b>Voice chat muted successfully.</b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="<emoji id='5408916593780470262'>🔇</emoji> <b>Voice chat muted successfully.</b>")
     except Exception as e:
         logger.error(f"Error in mute command: {e}")
-        await message.reply_text(text=messages.error(str(e)))
+        await message.reply_text(parse_mode=ParseMode.HTML, text=messages.error(str(e)))
 
 
 async def unmute_command(client: Client, message: Message, player):
@@ -498,7 +498,7 @@ async def unmute_command(client: Client, message: Message, player):
 
     try:
         await player.unmute(message.chat.id)
-        await message.reply_text(text="<emoji id='5260325873688518261'>🔊</emoji> <b>Voice chat unmuted.</b>")
+        await message.reply_text(parse_mode=ParseMode.HTML, text="<emoji id='5260325873688518261'>🔊</emoji> <b>Voice chat unmuted.</b>")
     except Exception as e:
         logger.error(f"Error in unmute command: {e}")
-        await message.reply_text(text=messages.error(str(e)))
+        await message.reply_text(parse_mode=ParseMode.HTML, text=messages.error(str(e)))

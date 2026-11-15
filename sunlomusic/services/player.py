@@ -327,7 +327,8 @@ class PlayerController:
                                 chat_id=chat_id,
                                 photo=_temp_thumb,
                                 caption=new_text,
-                                reply_markup=new_markup
+                                reply_markup=new_markup,
+                                parse_mode=ParseMode.HTML
                             )
                         except Exception as photo_err:
                             logger.error(f"Thumbnail send failed: {photo_err}, falling back to text")
@@ -370,10 +371,11 @@ class PlayerController:
                             logger.info(f"[VC Check] Could not resolve members for {chat_id}, skipping mention for safety")
 
                         if not in_vc:
-                            mention = f"[{requested_by}](tg://user?id={requested_by_id})"
+                            mention = f'<a href="tg://user?id={requested_by_id}">{requested_by}</a>'
                             await self.bot_client.send_message(
                                 chat_id,
-                                f"![🎵](tg://emoji?id=5334665104677941170) {mention}, **Now playing your requested track.**"
+                                f"<emoji id='5334665104677941170'>🎵</emoji> {mention}, <b>Now playing your requested track.</b>",
+                                parse_mode=ParseMode.HTML
                             )
                     except Exception as mention_err:
                         logger.error(f"Failed to send mention in {chat_id}: {mention_err}")
