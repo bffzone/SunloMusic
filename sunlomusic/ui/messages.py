@@ -241,39 +241,19 @@ class Messages:
 
     @staticmethod
     def start_welcome(user_name: str = "User") -> str:
-        return (
-            f"<b>✨ ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ꜱᴜɴʟᴏ ᴍᴜꜱɪᴄ, {user_name.upper()} ✨</b>
+        return f"""<b>✨ ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ꜱᴜɴʟᴏ ᴍᴜꜱɪᴄ, {user_name.upper()} ✨</b>
 
-"
-            f"<blockquote>🎧 <i>Experience the most advanced & lag-free music streaming in Telegram Voice Chats.</i></blockquote>
-"
-            f"┏━━━━━━━━━━━━━━━━━━━━┓
-"
-            f"   <b>⚡️ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ</b>
-"
-            f"┗━━━━━━━━━━━━━━━━━━━━┛
-"
-            f"🎵 <b>Music & Video:</b> High-Quality (320kbps) Streaming.
-"
-            f"🎛 <b>Controls:</b> Pause, Resume, Skip, Seek, Loop.
-"
-            f"📥 <b>Downloads:</b> Save restricted media easily.
-"
-            f"🤖 <b>AI Tools:</b> Chat with Gemini & Analyze Images.
-"
-            f"📧 <b>Utilities:</b> Temp Mail & Stylish Name Generator.
+<blockquote>🎧 <i>Experience the most advanced & lag-free music streaming in Telegram Voice Chats.</i></blockquote>
+┏━━━━━━━━━━━━━━━━━━━━┓
+   <b>⚡️ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ</b>
+┗━━━━━━━━━━━━━━━━━━━━┛
+🎵 <b>Music & Video:</b> High-Quality (320kbps) Streaming.
+🎛 <b>Controls:</b> Pause, Resume, Skip, Seek, Loop.
+📥 <b>Downloads:</b> Save restricted media easily.
+🤖 <b>AI Tools:</b> Chat with Gemini & Analyze Images.
+📧 <b>Utilities:</b> Temp Mail & Stylish Name Generator.
 
-"
-            f"<blockquote>👇 <b>Choose an option below to get started</b></blockquote>"
-        ) **Welcome to SunloMusic!**\n"
-            "Your all-in-one voice chat player for music and video\n\n"
-            "![🎵](tg://emoji?id=5334665104677941170) Play music & videos\n"
-            "⚡️ Smooth streaming\n"
-            "📌 Multi-chat support\n"
-            "🏚 Full controls (pause, skip, seek, shuffle, replay)\n"
-            "💿 Audio & video modes\n\n"
-            "![🚀](tg://emoji?id=5429440296867886716) Choose an option below to get started!"
-        )
+<blockquote>👇 <b>Choose an option below to get started</b></blockquote>"""
 
     @staticmethod
     def start_welcome_rich(custom_emoji: bool = True):
