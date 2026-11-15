@@ -18,7 +18,7 @@ from sunlomusic.handlers.callbacks import register_callbacks
 from sunlomusic.handlers.broadcast import register_broadcast_handlers
 from sunlomusic.handlers.events import register_event_handlers
 from sunlomusic.handlers.inline import register_inline_handlers
-from sunlomusic.handlers.fun import register_fun_handlers
+from sunlomusic.handlers.fun import register_fun_handlers, daily_couple_award_task
 from sunlomusic.handlers.name_maker import register_name_maker
 from sunlomusic.handlers.restricted import register_restricted_handlers
 from sunlomusic.handlers.gemini import register_gemini_handlers
@@ -128,6 +128,8 @@ class VCMusicBot:
             logger.info("Bot client started")
 
             await self.user_client.start()
+            import asyncio
+            asyncio.create_task(daily_couple_award_task(self.bot))
             logger.info("User client started successfully")
 
             await self.tgcalls_manager.initialize()
