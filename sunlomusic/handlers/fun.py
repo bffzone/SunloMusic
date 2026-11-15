@@ -7,7 +7,6 @@ import random
 import asyncio
 from sunlomusic.db import db
 from sunlomusic.core.logging import logger
-from sunlomusic.utils.permissions import permission_checker
 
 def get_percentage(name1, name2):
     sorted_names = "".join(sorted([name1.lower().strip(), name2.lower().strip()]))
@@ -63,8 +62,14 @@ def register_fun_handlers(app: Client):
             await message.reply_text("**Yeh command sirf groups mein kaam karti hai.**")
             return
             
-        if not await permission_checker.check_admin(client, message, require_admin=True):
-            return
+        # Simple Admin Check
+        try:
+            member = await client.get_chat_member(message.chat.id, message.from_user.id)
+            if member.status not in ["administrator", "creator", "owner"]:
+                await message.reply_text("❌ **Sirf group admins hi yeh command use kar sakte hain.**")
+                return
+        except Exception:
+            pass # Agar check fail ho toh command chalne dein
             
         args = message.text.split(maxsplit=1)
         if len(args) < 2:
@@ -74,7 +79,7 @@ def register_fun_handlers(app: Client):
         action = args[1].lower()
         if action == "on":
             await db.update_chat_settings(message.chat.id, {'couple_award': True})
-            await message.reply_text("✅ **Auto Daily Couple Award ON kar diya gaya hai!**\nBot ab din mein 5 baar random jodi ko award dega.")
+            await message.reply_text("✅ **Auto Daily Couple Award ON ho gaya hai!**\nBot ab din mein 5 baar random jodi ko award dega.")
         elif action == "off":
             await db.update_chat_settings(message.chat.id, {'couple_award': False})
             await message.reply_text("❌ **Auto Daily Couple Award OFF kar diya gaya hai.**")
@@ -90,9 +95,7 @@ async def daily_couple_award_task(app: Client):
                 for group in groups:
                     chat_id = group.get('chat_id')
                     if not chat_id: continue
-                    
                     try:
-                        # Check if enabled for this group
                         settings = await db.get_chat_settings(chat_id)
                         if not settings.get('couple_award', True):
                             continue
@@ -103,7 +106,6 @@ async def daily_couple_award_task(app: Client):
                                 members.append(m.user)
                         
                         if len(members) >= 2:
-                            # Purely random selection
                             random.shuffle(members)
                             user1 = members[0]
                             user2 = members[1]
@@ -131,6 +133,4 @@ async def daily_couple_award_task(app: Client):
                         continue
         except Exception as e:
             logger.error(f"Error in daily_couple_award_task: {e}")
-            
-        # Sleep for 4 hours
         await asyncio.sleep(4 * 60 * 60)

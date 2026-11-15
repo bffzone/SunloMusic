@@ -112,6 +112,7 @@ class VCMusicBot:
         register_broadcast_handlers(self.bot)
         register_event_handlers(self.bot)
         register_inline_handlers(self.bot)
+        register_fun_handlers(self.bot)
         register_name_maker(self.bot)
         register_whisper_handlers(self.bot)
         register_tempmail_handlers(self.bot)
