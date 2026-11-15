@@ -241,19 +241,17 @@ class Messages:
 
     @staticmethod
     def start_welcome(user_name: str = "User") -> str:
-        return f"""<b>✨ ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ꜱᴜɴʟᴏ ᴍᴜꜱɪᴄ, {user_name.upper()} ✨</b>
+        return f"""<b>✨ Welcome to SunloMusic, {user_name}! ✨</b>
 
-<blockquote>🎧 <i>Experience the most advanced & lag-free music streaming in Telegram Voice Chats.</i></blockquote>
-┏━━━━━━━━━━━━━━━━━━━━┓
-   <b>⚡️ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ</b>
-┗━━━━━━━━━━━━━━━━━━━━┛
-🎵 <b>Music & Video:</b> High-Quality (320kbps) Streaming.
-🎛 <b>Controls:</b> Pause, Resume, Skip, Seek, Loop.
-📥 <b>Downloads:</b> Save restricted media easily.
-🤖 <b>AI Tools:</b> Chat with Gemini & Analyze Images.
-📧 <b>Utilities:</b> Temp Mail & Stylish Name Generator.
+<blockquote>🎧 <i>The most advanced music streaming bot for Telegram Voice Chats. Lag-free, high-quality, and fully equipped with AI tools.</i></blockquote>
 
-<blockquote>👇 <b>Choose an option below to get started</b></blockquote>"""
+🚀 <b>What can I do?</b>
+» <b>Ultra-Fast Streaming:</b> Crystal clear 320kbps audio.
+» <b>Smart Playback:</b> Auto-play, Loop & Queue system.
+» <b>Media Downloader:</b> Save restricted files easily.
+» <b>AI & Utilities:</b> AI Chat, Temp Mail, Stylish Names.
+
+👇 <i>Click the buttons below to explore!</i>"""
 
     @staticmethod
     def start_welcome_rich(custom_emoji: bool = True):
