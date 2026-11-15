@@ -404,15 +404,40 @@ class Keyboards:
         buttons = [
             [
                 InlineKeyboardButton(
-                    "Add me to a Group",
+                    "ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ",
                     url=f"https://t.me/{bot_username}?startgroup=start",
-                    style=ButtonStyle.PRIMARY,
+                    style=ButtonStyle.SUCCESS,
+                    icon_custom_emoji_id=5397782960512444702
                 )
             ],
             [
-                InlineKeyboardButton("Help", callback_data="help_menu", style=ButtonStyle.SUCCESS),
-                InlineKeyboardButton("Support", url="https://t.me/YO_UR_OFFICIAL_CRUSH", style=ButtonStyle.DANGER),
+                InlineKeyboardButton(
+                    "ʜᴇʟᴘ", 
+                    callback_data="help_menu", 
+                    style=ButtonStyle.PRIMARY,
+                    icon_custom_emoji_id=5334665104677941170
+                ),
+                InlineKeyboardButton(
+                    "ꜱᴜᴘᴘᴏʀᴛ", 
+                    url="https://t.me/YO_UR_OFFICIAL_CRUSH", 
+                    style=ButtonStyle.DANGER,
+                    icon_custom_emoji_id=5316742794562254812
+                ),
             ],
+            [
+                InlineKeyboardButton(
+                    "ᴜᴘᴅᴀᴛᴇꜱ", 
+                    url="https://t.me/Vip_Sakil_Bio", 
+                    style=ButtonStyle.PRIMARY,
+                    icon_custom_emoji_id=5429440296867886716
+                ),
+                InlineKeyboardButton(
+                    "ᴏᴡɴᴇʀ", 
+                    url="https://t.me/YO_UR_OFFICIAL_CRUSH", 
+                    style=ButtonStyle.PRIMARY,
+                    icon_custom_emoji_id=5316631095347788915
+                )
+            ]
         ]
         return InlineKeyboardMarkup(buttons)
 
