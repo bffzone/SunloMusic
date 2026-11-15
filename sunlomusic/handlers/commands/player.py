@@ -17,14 +17,11 @@ from sunlomusic.core.config import Config
 
 
 async def play_command(client: Client, message: Message, player, tgcalls):
-    from pyrogram.enums import ChatType
+    from pyrogram.enums import ChatType, ParseMode
 
     if message.chat.type == ChatType.PRIVATE:
         me = await client.get_me()
-        await message.reply_text(parse_mode=ParseMode.HTML, text=
-            messages.dm_not_allowed(),
-            reply_markup=keyboards.start_menu(me.username)
-       )
+        await message.reply_text(messages.dm_not_allowed(), reply_markup=keyboards.start_menu(me.username))
         return
 
     if not await permission_checker.check_admin(client, message):
@@ -34,14 +31,14 @@ async def play_command(client: Client, message: Message, player, tgcalls):
 
     if message.reply_to_message:
         from sunlomusic.services.processor import processor
-        status_msg = await message.reply_text(parse_mode=ParseMode.HTML, text="📥 <b>Processing Telegram file...</b>")
+        status_msg = await message.reply_text("📥 <b>Processing Telegram file...</b>", parse_mode=ParseMode.HTML)
         file_info = await processor.download_telegram_file(client, message.reply_to_message)
 
         if file_info and 'error' in file_info:
             if file_info['error'] == 'unsupported':
-                await status_msg.edit_text(parse_mode=ParseMode.HTML, text="❌ <b>Only audio and video files are supported.</b>")
+                await status_msg.edit_text("❌ <b>Only audio and video files are supported.</b>", parse_mode=ParseMode.HTML)
             else:
-                await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error("Unable to process that file. Please try another file."))
+                await status_msg.edit_text(messages.error("Unable to process that file. Please try another file."), parse_mode=ParseMode.HTML)
             return
 
         if file_info:
@@ -50,13 +47,8 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                 hours = Config.MAX_TRACK_DURATION // 3600
                 dur_h = int(file_duration // 3600)
                 dur_m = int((file_duration % 3600) // 60)
-                await status_msg.edit_text(parse_mode=ParseMode.HTML, text=
-                    f"⏱️ <b>Track Too Long</b>\n\n"
-                    f"<emoji id='5222472119295684375'>🎸</emoji> {file_info.get('title', 'This file')}\n"
-                    f"⌛️ <b>Duration:</b> {dur_h}h {dur_m}m\n"
-                    f"⚠️ <b>Limit:</b> {hours}h max\n\n"
-                    f"Please choose a shorter track."
-               )
+                txt = f"⏱️ <b>Track Too Long</b>\n\n<emoji id='5222472119295684375'>🎸</emoji> {file_info.get('title', 'This file')}\n⌛️ <b>Duration:</b> {dur_h}h {dur_m}m\n⚠️ <b>Limit:</b> {hours}h max\n\nPlease choose a shorter track."
+                await status_msg.edit_text(txt, parse_mode=ParseMode.HTML)
                 return
             track = {
                 'type': 'telegram',
@@ -73,7 +65,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                 current = await queue_manager.get_current_track(message.chat.id)
                 if current:
                     try:
-                        await status_msg.edit_text(parse_mode=ParseMode.HTML, text="<emoji id='5429440296867886716'>🚀</emoji> <b>Almost there… Starting playback!</b>",)
+                        await status_msg.edit_text("<emoji id='5429440296867886716'>🚀</emoji> <b>Almost there… Starting playback!</b>", parse_mode=ParseMode.HTML)
                     except Exception:
                         pass
                     player.set_now_playing_message(message.chat.id, status_msg.id)
@@ -82,9 +74,9 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                     except Exception as play_err:
                         logger.error(f"Error starting playback in {message.chat.id}: {play_err}")
                         try:
-                            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error(str(play_err)))
+                            await status_msg.edit_text(messages.error(str(play_err)), parse_mode=ParseMode.HTML)
                         except Exception:
-                            await message.reply_text(parse_mode=ParseMode.HTML, text=messages.error(str(play_err)))
+                            await message.reply_text(messages.error(str(play_err)), parse_mode=ParseMode.HTML)
             else:
                 queue = await queue_manager.get_queue(message.chat.id)
                 current = await player.get_current_track(message.chat.id)
@@ -101,22 +93,11 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                 except Exception:
                     pass
                 old_np_id = player.get_now_playing_message(message.chat.id)
-                _thumb = current.get('thumbnail') if current else None
-                _caption = messages.now_playing(current, current.get('requested_by', 'Unknown'), current_time, queue, playlist_unfetched)
-                _kb = keyboards.player_controls(message.chat.id, is_paused, current_time, total_time, is_live, loop_mode, len(queue), settings.get('autoplay', False))
-                
-                if _thumb and _thumb.startswith("http"):
-                    try:
-                        msg = await message.reply_photo(
-                            photo=_thumb,
-                            caption=_caption,
-                            reply_markup=_kb
-                       )
-                    except Exception as e:
-                        logger.error(f"Thumbnail send failed: {e}")
-                        msg = await message.reply_text(parse_mode=ParseMode.HTML, text=_caption, reply_markup=_kb)
-                else:
-                    msg = await message.reply_text(parse_mode=ParseMode.HTML, text=_caption, reply_markup=_kb)
+                msg = await message.reply_text(
+                    messages.now_playing(current, current.get('requested_by', 'Unknown'), current_time, queue, playlist_unfetched),
+                    reply_markup=keyboards.player_controls(message.chat.id, is_paused, current_time, total_time, is_live, loop_mode, len(queue), settings.get('autoplay', False)),
+                    parse_mode=ParseMode.HTML
+                )
                 if old_np_id and old_np_id != msg.id:
                     try:
                         await client.delete_messages(message.chat.id, old_np_id)
@@ -127,20 +108,20 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                 if ui_progress_updater.progress_updater:
                     ui_progress_updater.progress_updater.start_updates(message.chat.id, msg.id)
         else:
-            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error("Unable to process that file. Please try another file."))
+            await status_msg.edit_text(messages.error("Unable to process that file. Please try another file."), parse_mode=ParseMode.HTML)
         return
 
     if not query:
-        await message.reply_text(parse_mode=ParseMode.HTML, text="❌ <b>I need a song name or YouTube link to play.</b>")
+        await message.reply_text("❌ <b>I need a song name or YouTube link to play.</b>", parse_mode=ParseMode.HTML)
         return
 
     source_type, source_value = validators.detect_source(query)
 
     try:
-        status_msg = await message.reply_text(parse_mode=ParseMode.HTML, text="<emoji id='5258396243666681152'>🔎</emoji> <b>Searching your song… hold on!</b>")
+        status_msg = await message.reply_text("<emoji id='5258396243666681152'>🔎</emoji> <b>Searching your song… hold on!</b>", parse_mode=ParseMode.HTML)
 
         if source_type == 'url' and not validators.is_youtube_url(source_value):
-            await status_msg.edit_text(parse_mode=ParseMode.HTML, text="❌ <b>Only YouTube links are supported for playback.</b>")
+            await status_msg.edit_text("❌ <b>Only YouTube links are supported for playback.</b>", parse_mode=ParseMode.HTML)
             return
 
         if source_type == 'youtube' and downloader.is_playlist_url(source_value):
@@ -151,11 +132,11 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                     pass
                 return
 
-            await status_msg.edit_text(parse_mode=ParseMode.HTML, text="📋 <b>Loading playlist… fetching first tracks!</b>")
+            await status_msg.edit_text("📋 <b>Loading playlist… fetching first tracks!</b>", parse_mode=ParseMode.HTML)
 
             playlist_info = await downloader.get_playlist_info(source_value)
             if not playlist_info or not playlist_info.get('entries'):
-                await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error("Could not load playlist. Make sure it is public."))
+                await status_msg.edit_text(messages.error("Could not load playlist. Make sure it is public."), parse_mode=ParseMode.HTML)
                 return
 
             total = min(playlist_info['total'], Config.MAX_PLAYLIST_TRACKS)
@@ -163,7 +144,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             first_batch = await downloader.get_playlist_batch(source_value, 0, batch_size)
 
             if not first_batch:
-                await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error("Could not load any tracks from playlist."))
+                await status_msg.edit_text(messages.error("Could not load any tracks from playlist."), parse_mode=ParseMode.HTML)
                 return
 
             requester = message.from_user.first_name if message.from_user else "Unknown"
@@ -177,7 +158,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             loaded = len(first_batch)
             queue_manager.set_playlist_state(
                 message.chat.id, source_value, total, loaded, requester, requester_id
-           )
+            )
 
             original_total = playlist_info['total']
             cap_note = " (limit)" if original_total > Config.MAX_PLAYLIST_TRACKS else ""
@@ -187,13 +168,11 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                 first_track_line = f"{first_track_artist} — {first_track_title}"
             else:
                 first_track_line = first_track_title
+                
+            txt = f"🎧 <b>Playlist Ready</b>\n\n• Added to queue: <b>{loaded} tracks</b>\n• Playlist contains: <b>{total} tracks{cap_note}</b>\n\n▶️ <b>First Track:</b>\n{first_track_line}"
             await edit_to_playlist_ready(
-                status_msg, loaded, total, cap_note, first_track_line,
-                f"🎧 <b>Playlist Ready</b>\n\n"
-                f"• Added to queue: <b>{loaded} tracks</b>\n"
-                f"• Playlist contains: <b>{total} tracks{cap_note}</b>\n\n"
-                f"▶️ <b>First Track:</b>\n{first_track_line}",
-           )
+                status_msg, loaded, total, cap_note, first_track_line, txt
+            )
 
             if not await player.is_playing(message.chat.id):
                 current = await queue_manager.get_current_track(message.chat.id)
@@ -208,7 +187,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             metadata = await downloader.get_metadata(source_value)
 
         if not metadata:
-            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error("No results found. Try a different link or search term."))
+            await status_msg.edit_text(messages.error("No results found. Try a different link or search term."), parse_mode=ParseMode.HTML)
             return
 
         track_duration = metadata.get('duration', 0) or 0
@@ -216,13 +195,8 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             hours = Config.MAX_TRACK_DURATION // 3600
             dur_h = int(track_duration // 3600)
             dur_m = int((track_duration % 3600) // 60)
-            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=
-                f"⏱️ <b>Track Too Long</b>\n\n"
-                f"<emoji id='5222472119295684375'>🎸</emoji> {metadata.get('title', 'This track')}\n"
-                f"⌛️ <b>Duration:</b> {dur_h}h {dur_m}m\n"
-                f"⚠️ <b>Limit:</b> {hours}h max\n\n"
-                f"Please choose a shorter track."
-           )
+            txt = f"⏱️ <b>Track Too Long</b>\n\n<emoji id='5222472119295684375'>🎸</emoji> {metadata.get('title', 'This track')}\n⌛️ <b>Duration:</b> {dur_h}h {dur_m}m\n⚠️ <b>Limit:</b> {hours}h max\n\nPlease choose a shorter track."
+            await status_msg.edit_text(txt, parse_mode=ParseMode.HTML)
             return
 
         track = {
@@ -238,41 +212,27 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             '_raw_info': metadata.get('_raw_info'),
         }
 
-        if await player.is_playing(message.chat.id):
-            current = await player.get_current_track(message.chat.id)
-            current_video_id = downloader.track_video_id(current) if current else None
-            if current_video_id and current_video_id == downloader.track_video_id(track):
-                logger.info(f"Refused duplicate play of '{track['title']}' in {message.chat.id} (already playing)")
-                await status_msg.edit_text(parse_mode=ParseMode.HTML, text=
-                    f"🔁 <b>Already Playing</b>\n\n"
-                    f"<emoji id='5222472119295684375'>🎸</emoji> {track['title']}\n\n"
-                    f"⚠️ <b>This music is already playing in the voice chat.</b>"
-               )
-                return
-
-        # Check if song is already in queue
-        queue_list = await queue_manager.get_queue(message.chat.id)
-        current_playing_track = await player.get_current_track(message.chat.id)
-        
         is_duplicate = False
         
-        # Check if the song is already playing right now
-        if current_playing_track and downloader.track_video_id(current_playing_track) == downloader.track_video_id(track):
-            is_duplicate = True
-            
-        # Check if the song is already in the upcoming queue
+        if await player.is_playing(message.chat.id):
+            current_playing_track = await player.get_current_track(message.chat.id)
+            if current_playing_track and downloader.track_video_id(current_playing_track) == downloader.track_video_id(track):
+                is_duplicate = True
+
         if not is_duplicate:
+            queue_list = await queue_manager.get_queue(message.chat.id)
             for item in queue_list:
                 if downloader.track_video_id(item) == downloader.track_video_id(track):
                     is_duplicate = True
                     break
                 
         if is_duplicate:
-            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=
-                f"🔁 <b>Already in Queue</b>\n\n"
-                f"<emoji id='5222472119295684375'>🎸</emoji> {track['title']}\n\n"
-                f"⚠️ <b>This music is already in the playlist/queue.</b>"
-           )
+            txt = f"🔁 <b>Already in Queue</b>\n\n<emoji id='5222472119295684375'>🎸</emoji> {track['title']}\n\n⚠️ <b>This music is already in the playlist/queue.</b>"
+            await status_msg.edit_text(txt, parse_mode=ParseMode.HTML)
+            if not await player.is_playing(message.chat.id):
+                current = await queue_manager.get_current_track(message.chat.id)
+                if current:
+                    await player.play(message.chat.id, current)
             return
 
         await queue_manager.add_track(message.chat.id, track)
@@ -281,7 +241,7 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             current = await queue_manager.get_current_track(message.chat.id)
             if current:
                 try:
-                    await status_msg.edit_text(parse_mode=ParseMode.HTML, text="<emoji id='5429440296867886716'>🚀</emoji> <b>Almost there… Starting playback!</b>",)
+                    await status_msg.edit_text("<emoji id='5429440296867886716'>🚀</emoji> <b>Almost there… Starting playback!</b>", parse_mode=ParseMode.HTML)
                 except Exception:
                     pass
                 player.set_now_playing_message(message.chat.id, status_msg.id)
@@ -290,9 +250,9 @@ async def play_command(client: Client, message: Message, player, tgcalls):
                 except Exception as play_err:
                     logger.error(f"Error starting playback in {message.chat.id}: {play_err}")
                     try:
-                        await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error(str(play_err)))
+                        await status_msg.edit_text(messages.error(str(play_err)), parse_mode=ParseMode.HTML)
                     except Exception:
-                        await message.reply_text(parse_mode=ParseMode.HTML, text=messages.error(str(play_err)))
+                        await message.reply_text(messages.error(str(play_err)), parse_mode=ParseMode.HTML)
         else:
             queue = await queue_manager.get_queue(message.chat.id)
             current = await player.get_current_track(message.chat.id)
@@ -309,10 +269,11 @@ async def play_command(client: Client, message: Message, player, tgcalls):
             except Exception:
                 pass
             old_np_id = player.get_now_playing_message(message.chat.id)
-            msg = await message.reply_text(parse_mode=ParseMode.HTML, text=
+            msg = await message.reply_text(
                 messages.now_playing(current, current.get('requested_by', 'Unknown'), current_time, queue, playlist_unfetched),
-                reply_markup=keyboards.player_controls(message.chat.id, is_paused, current_time, total_time, is_live, loop_mode, len(queue), settings.get('autoplay', False))
-           )
+                reply_markup=keyboards.player_controls(message.chat.id, is_paused, current_time, total_time, is_live, loop_mode, len(queue), settings.get('autoplay', False)),
+                parse_mode=ParseMode.HTML
+            )
             if old_np_id and old_np_id != msg.id:
                 try:
                     await client.delete_messages(message.chat.id, old_np_id)
@@ -326,10 +287,9 @@ async def play_command(client: Client, message: Message, player, tgcalls):
     except Exception as e:
         logger.error(f"Error in play command: {e}")
         try:
-            await status_msg.edit_text(parse_mode=ParseMode.HTML, text=messages.error(str(e)))
+            await status_msg.edit_text(messages.error(str(e)), parse_mode=ParseMode.HTML)
         except Exception:
-            await message.reply_text(parse_mode=ParseMode.HTML, text=messages.error(str(e)))
-
+            await message.reply_text(messages.error(str(e)), parse_mode=ParseMode.HTML)
 
 async def pause_command(client: Client, message: Message, player):
     from pyrogram.enums import ChatType
