@@ -327,9 +327,7 @@ class PlayerController:
                                 chat_id=chat_id,
                                 photo=_temp_thumb,
                                 caption=new_text,
-                                reply_markup=new_markup,
-                                parse_mode=ParseMode.HTML
-                            )
+                                reply_markup=new_markup)
                         except Exception as photo_err:
                             logger.error(f"Thumbnail send failed: {photo_err}, falling back to text")
                             new_msg = await bot_client.send_message(
@@ -374,9 +372,7 @@ class PlayerController:
                             mention = f'<a href="tg://user?id={requested_by_id}">{requested_by}</a>'
                             await self.bot_client.send_message(
                                 chat_id,
-                                f"<emoji id='5334665104677941170'>🎵</emoji> {mention}, <b>Now playing your requested track.</b>",
-                                parse_mode=ParseMode.HTML
-                            )
+                                f"<emoji id='5334665104677941170'>🎵</emoji> {mention}, <b>Now playing your requested track.</b>")
                     except Exception as mention_err:
                         logger.error(f"Failed to send mention in {chat_id}: {mention_err}")
 
@@ -1083,11 +1079,9 @@ class PlayerController:
             chat_id, message_id,
             (
                 messages.autoplay_queued_rich(len(tracks), seed_title, True),
-                messages.autoplay_queued_rich(len(tracks), seed_title, False),
-            ),
+                messages.autoplay_queued_rich(len(tracks), seed_title, False)),
             messages.autoplay_queued(len(tracks), seed_title),
-            reply_markup=keyboards.close_only(chat_id),
-        )
+            reply_markup=keyboards.close_only(chat_id))
         await self.play(chat_id, tracks[0])
         return True
 

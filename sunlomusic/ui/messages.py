@@ -6,17 +6,14 @@ class Messages:
     @staticmethod
     def now_playing(track: Dict, requested_by: str = "Unknown", current_time: int = 0, queue: List[Dict] = None, playlist_unfetched: int = 0) -> str:
         title = track.get('title', 'Unknown')
-        message = "<emoji id='5334665104677941170'>🎵</emoji> <b>Music Playlist:</b>\n\n"
-
+        message = "<emoji id='5334665104677941170'>🎵</emoji> <b>Music Playlist:</b>" + chr(10) + chr(10)
         req_id = track.get('requested_by_id')
         if req_id:
             req_mention = f'<a href="tg://user?id={req_id}">{requested_by}</a>'
         else:
             req_mention = requested_by
-
-        message += f"<b>1. <emoji id='5222472119295684375'>🎸</emoji> {title}</b>\n"
-        message += f"<emoji id='5944970130554359187'>🏆</emoji> <b>Requested by:</b> {req_mention}\n\n"
-
+        message += f"<b>1. <emoji id='5222472119295684375'>🎸</emoji> {title}</b>" + chr(10)
+        message += f"<emoji id='5944970130554359187'>🏆</emoji> <b>Requested by:</b> {req_mention}" + chr(10) + chr(10)
         if queue and len(queue) > 1:
             for i, next_track in enumerate(queue[1:4], start=2):
                 next_title = next_track.get('title', 'Unknown')
@@ -28,15 +25,13 @@ class Messages:
                     next_mention = f'<a href="tg://user?id={next_id}">{next_name}</a>'
                 else:
                     next_mention = next_name
-                message += f"<b>{i}. <emoji id='5222472119295684375'>🎸</emoji> {next_title}</b>\n"
-                message += f"<emoji id='5944970130554359187'>🏆</emoji> <b>Requested by:</b> {next_mention}\n\n"
-
+                message += f"<b>{i}. <emoji id='5222472119295684375'>🎸</emoji> {next_title}</b>" + chr(10)
+                message += f"<emoji id='5944970130554359187'>🏆</emoji> <b>Requested by:</b> {next_mention}" + chr(10) + chr(10)
             shown = min(len(queue), 4)
             remaining_in_queue = len(queue) - shown
             total_remaining = remaining_in_queue + playlist_unfetched
             if total_remaining > 0:
                 message += f"<b>✨ {total_remaining} tracks still in the playlist.....</b>"
-
         return message
 
     @staticmethod
