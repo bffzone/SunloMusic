@@ -33,7 +33,7 @@ def get_ship_message(percent, name1, name2):
         quote = "Dil toh ek hai, bas dhadkan alag hai. True Love!"
 
     return (
-        f"<b>💘 Love Calculator 💘</b>\n\n"
+        f"<b>❤️ Love Calculator ❤️</b>\n\n"
         f"👤 <b>{name1}</b>\n"
         f"➕\n"
         f"👤 <b>{name2}</b>\n\n"
@@ -42,8 +42,8 @@ def get_ship_message(percent, name1, name2):
     )
 
 def register_fun_handlers(app: Client):
-    @app.on_message(filters.command("ship"))
-    async def ship_command(client, message: Message):
+    @app.on_message(filters.command("love"))
+    async def love_command(client, message: Message):
         args = message.text.split(maxsplit=1)
         name1, name2 = None, None
 
@@ -52,16 +52,16 @@ def register_fun_handlers(app: Client):
             name1 = message.from_user.first_name
             name2 = message.reply_to_message.from_user.first_name
         elif len(args) > 1:
-            # User typed /ship Name1 Name2
+            # User typed /love Name1 Name2
             names = args[1].split()
             if len(names) >= 2:
                 name1 = names[0]
                 name2 = names[1]
             else:
-                await message.reply_text("**Usage:**\n`/ship Name1 Name2`\nYa kisi ke message par reply karke `/ship` likhein.")
+                await message.reply_text("**Usage:**\n`/love Name1 Name2`\nYa kisi ke message par reply karke `/ship` likhein.")
                 return
         else:
-            await message.reply_text("**Usage:**\n`/ship Name1 Name2`\nYa kisi ke message par reply karke `/ship` likhein.")
+            await message.reply_text("**Usage:**\n`/love Name1 Name2`\nYa kisi ke message par reply karke `/ship` likhein.")
             return
 
         percent = get_percentage(name1, name2)

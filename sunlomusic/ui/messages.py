@@ -307,7 +307,7 @@ class Messages:
             types.InputRichBlockParagraph(types.RichTextBold(first_track)),
         ])
 
-    HELP_BASIC = [        ("/ship <name1> <name2>", "Calculate Love Percentage"),
+    HELP_BASIC = [        ("/love <name1> <name2>", "Calculate Love Percentage"),
         ("/name <text>", "Generate stylish names"),
 
         ("/start", "Show welcome message"),
